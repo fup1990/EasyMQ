@@ -24,7 +24,7 @@ import com.gome.fup.mq.common.http.Response;
  */
 public class CallBack {
 	
-	private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+	private static ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
 	public static void callback(final String host, final int port, final Request request) {
 		executorService.submit(new Runnable() {
