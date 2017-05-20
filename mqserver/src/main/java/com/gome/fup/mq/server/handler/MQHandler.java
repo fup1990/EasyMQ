@@ -1,5 +1,6 @@
 package com.gome.fup.mq.server.handler;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
@@ -35,48 +38,55 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 	@Override
 	protected synchronized void channelRead0(ChannelHandlerContext ctx,
 			Request request) throws Exception {
-		if (request.getType().intValue() == Constant.REQUEST_TYPE_MSG) {
-			String groupName = request.getGroupName();
-			Queue<String> queue = cacheQueue.get(groupName);
-			if (queue == null) {
-				queue = new Queue<String>();
-				queue.setGroupName(groupName);
-				queue.addObserver(new QueueObserver());
-				cacheQueue.put(groupName, queue);
-			}
-
-			logger.debug("MQ服务器接收到消息，并将消息存入队列中。");
-			queue.put(request.getMsg());
-			Response response = new Response();
-			response.setData("mq already recieved message!!");
-			response.setGroupName(request.getGroupName());
-			response.setStatus(Constant.SECCUESS);
-			ctx.writeAndFlush(response)
-					.addListener(ChannelFutureListener.CLOSE);
+		Response response = null;
+		if (request.getType() == Constant.REQUEST_TYPE_MSG) {	//接收到消息
+			response = putRequestInQueue(ctx, request);
 		}
-		if (request.getType().intValue() == Constant.REQUEST_TYPE_LISTENER) {
-			String msg = request.getMsg();
-			// byte[] bytes = msg.getBytes("UTF-8");
-			byte[] bytes = Base64.decode(msg);
-			Map<String, List<Listener>> multimap = KryoUtil.byteToObj(bytes,
-					HashMap.class);
+		if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
+			response = cacheListener(ctx, request);
+		}
+		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+	}
+
+	private Response putRequestInQueue(ChannelHandlerContext ctx, Request request) throws Exception{
+		String groupName = request.getGroupName();
+		Queue<String> queue = cacheQueue.get(groupName);
+		if (queue == null) {
+			queue = new Queue<String>();
+			queue.setGroupName(groupName);
+			queue.addObserver(new QueueObserver());
+			cacheQueue.put(groupName, queue);
+		}
+
+		logger.debug("MQ服务器接收到消息，并将消息存入队列中。");
+		queue.put(request.getMsg());
+		Response response = new Response();
+		response.setData("mq already recieved message!!");
+		response.setGroupName(request.getGroupName());
+		response.setStatus(Constant.SECCUESS);
+		return response;
+	}
+
+	private Response cacheListener(ChannelHandlerContext ctx, Request request) throws Exception {
+		String msg = request.getMsg();
+		// byte[] bytes = msg.getBytes("UTF-8");
+		byte[] bytes = Base64.decode(msg);
+		Map<String, List<Listener>> multimap = KryoUtil.byteToObj(bytes, HashMap.class);
 			/*
 			 * Multiset<String> keys = multimap.keys(); for (String groupName :
 			 * keys) { Collection<Listener> collection =
 			 * multimap.get(groupName); cache.set(groupName, collection); }
 			 */
-			for (Map.Entry<String, List<Listener>> entry : multimap.entrySet()) {
-				Cache.getCache().set(entry.getKey(), entry.getValue());
-			}
-			logger.debug("MQ服务器接收到消息消费者的监听记录。");
-
-			Response response = new Response();
-			response.setData("Listener already Registed in server cache!!");
-			response.setGroupName(request.getGroupName());
-			response.setStatus(Constant.SECCUESS);
-			ctx.writeAndFlush(response)
-					.addListener(ChannelFutureListener.CLOSE);
+		for (Map.Entry<String, List<Listener>> entry : multimap.entrySet()) {
+			Cache.getCache().set(entry.getKey(), entry.getValue());
 		}
+		logger.debug("MQ服务器接收到消息消费者的监听记录。");
+
+		Response response = new Response();
+		response.setData("Listener already Registed in server cache!!");
+		response.setGroupName(request.getGroupName());
+		response.setStatus(Constant.SECCUESS);
+		return response;
 	}
 
 	public Map<String, Queue<String>> getCacheQueue() {
