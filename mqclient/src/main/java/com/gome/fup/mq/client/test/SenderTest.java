@@ -14,8 +14,8 @@ public class SenderTest {
 	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		new ClassPathXmlApplicationContext("classpath:spring.xml");
-		MessageSender.send("group1", "这是一条测试消息");		
-		MessageSender.send("group2", "这是第二条条测试消息");	
+		for(int i = 0; i < 1000; i++) {
+			final int no = i;
 			Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
