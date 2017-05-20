@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -19,9 +21,11 @@ import com.gome.fup.mq.common.model.Listener;
  *
  * @author fupeng-ds
  */
-public class ListenerRegister extends AbstractRegister implements ApplicationContextAware, InitializingBean{
+public class ListenerRegister extends AbstractRegister implements Runnable, ApplicationContextAware, InitializingBean{
 	
 	private final Logger logger = Logger.getLogger(this.getClass());
+
+	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 	//private Multimap<String, Listener> multimap = ArrayListMultimap.create();
 	private Map<String, List<Listener>> multimap = new HashMap<String, List<Listener>>();
@@ -31,6 +35,24 @@ public class ListenerRegister extends AbstractRegister implements ApplicationCon
 	private String localAddr;
 
 	public void afterPropertiesSet() throws Exception {
+		executorService.submit(this);
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	public String getLocalAddr() {
+		return localAddr;
+	}
+
+	public void setLocalAddr(String localAddr) {
+		this.localAddr = localAddr;
+	}
+
+
+	public void run() {
 		logger.debug("获取消息监听。");
 		//获取所有继承了监听的实现
 		Map<String, MessageReceiver> map = applicationContext.getBeansOfType(MessageReceiver.class);
@@ -52,19 +74,4 @@ public class ListenerRegister extends AbstractRegister implements ApplicationCon
 		//发送给mq服务端
 		sendListenerToMQServer(multimap);
 	}
-
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	public String getLocalAddr() {
-		return localAddr;
-	}
-
-	public void setLocalAddr(String localAddr) {
-		this.localAddr = localAddr;
-	}
-	
-	
 }

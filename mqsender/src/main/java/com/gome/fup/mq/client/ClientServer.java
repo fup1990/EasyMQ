@@ -20,14 +20,19 @@ import com.gome.fup.mq.common.handler.EncoderHandler;
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.util.AddressUtil;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * 
  *
  * @author fupeng-ds
  */
-public class ClientServer implements InitializingBean, ApplicationContextAware{
+public class ClientServer implements Runnable, InitializingBean, ApplicationContextAware{
 
 	private ApplicationContext applicationContext;
+
+	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 	
 	private String localAddr;
 
@@ -40,6 +45,15 @@ public class ClientServer implements InitializingBean, ApplicationContextAware{
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		executorService.submit(this);
+	}
+	
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	public void run() {
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {
@@ -70,10 +84,5 @@ public class ClientServer implements InitializingBean, ApplicationContextAware{
 			workerGroup.shutdownGracefully();
 			bossGroup.shutdownGracefully();
 		}
-	}
-	
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
 	}
 }

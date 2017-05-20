@@ -1,5 +1,6 @@
 package com.gome.fup.mq.sender;
 
+import com.gome.fup.mq.common.exception.NoServerAddrException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -53,6 +54,9 @@ public class QueueSender {
 								}
 							}).option(ChannelOption.SO_KEEPALIVE, true);
 					String[] addr = AddressUtil.getServerAddr(serverAddr);
+					if (null == addr) {
+						throw new NoServerAddrException("服务地址未加载异常");
+					}
 					String host = addr[0];
 					Integer port = Integer.parseInt(addr[1]);
 					// 链接服务器
