@@ -16,5 +16,14 @@ public class SenderTest {
 		new ClassPathXmlApplicationContext("classpath:spring.xml");
 		MessageSender.send("group1", "这是一条测试消息");		
 		MessageSender.send("group2", "这是第二条条测试消息");	
+			Thread thread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					MessageSender.send("group1", "这是第" + no + "条测试消息");
+				}
+			});
+			thread.start();
+		}
+
 	}
 }
