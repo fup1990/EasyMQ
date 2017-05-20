@@ -11,6 +11,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,17 +28,32 @@ import com.gome.fup.mq.server.queue.Queue;
  * 
  *
  * @author fupeng-ds
- * @param <E>
  */
-public class MQServer implements InitializingBean {
+public class MQServer implements Runnable, InitializingBean {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 
 	private String serverAddr;
 
 	private Map<String, Queue<String>> cacheQueue = new ConcurrentHashMap<String, Queue<String>>();
+
+	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 	
 	public void afterPropertiesSet() throws Exception {
+		executorService.submit(this);
+	}
+
+	public String getServerAddr() {
+		return serverAddr;
+	}
+
+	public void setServerAddr(String serverAddr) {
+		this.serverAddr = serverAddr;
+	}
+
+
+	@Override
+	public void run() {
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		try {
@@ -57,6 +74,9 @@ public class MQServer implements InitializingBean {
 					}).option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
 			String[] split = AddressUtil.getServerAddr(serverAddr);
+			if (null == split) {
+				return;
+			}
 			String host = split[0];
 			Integer port = Integer.parseInt(split[1]);
 			ChannelFuture future = bootstrap.bind(host, port).sync();
@@ -69,14 +89,4 @@ public class MQServer implements InitializingBean {
 			bossGroup.shutdownGracefully();
 		}
 	}
-
-	public String getServerAddr() {
-		return serverAddr;
-	}
-
-	public void setServerAddr(String serverAddr) {
-		this.serverAddr = serverAddr;
-	}
-
-	
 }
