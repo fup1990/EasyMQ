@@ -2,6 +2,7 @@ package com.gome.fup.mq.server.observer;
 
 import java.util.Collection;
 
+import com.gome.fup.mq.common.exception.NoServerAddrException;
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
@@ -32,7 +33,12 @@ public class QueueObserver implements Observer {
 			if(collection != null && collection.size() != 0) {
 				for (Listener listener : collection) {
 					logger.debug("将消息发送给消费者。");
-					sendMsgToListener(listener, msg);
+					try {
+						sendMsgToListener(listener, msg);
+					} catch (NoServerAddrException e) {
+						e.printStackTrace();
+						logger.error(e.getMessage());
+					}
 					break;
 				}
 			}
@@ -41,8 +47,9 @@ public class QueueObserver implements Observer {
 		}
 	}
 
-	private void sendMsgToListener(Listener listener, String msg) {
+	private void sendMsgToListener(Listener listener, String msg) throws NoServerAddrException {
 		String[] arr = AddressUtil.getServerAddr(listener.getAddr());
+		if (null == arr) throw new NoServerAddrException("服务地址未加载异常");
 		String host = arr[0];
 		int port = Integer.parseInt(arr[1]);
 		Request request = new Request();
