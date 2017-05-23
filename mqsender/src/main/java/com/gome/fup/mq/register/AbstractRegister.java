@@ -45,6 +45,6 @@ public abstract class AbstractRegister {
 	public void setSender(QueueSender sender) {
 		this.sender = sender;
 	}
-	
-	
+
+
 }

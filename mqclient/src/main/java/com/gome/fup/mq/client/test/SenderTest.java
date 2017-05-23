@@ -1,8 +1,9 @@
 package com.gome.fup.mq.client.test;
 
+import com.gome.fup.mq.sender.MessageSender;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.gome.fup.mq.client.util.MessageSender;
 
 /**
  * 
@@ -11,19 +12,18 @@ import com.gome.fup.mq.client.util.MessageSender;
  */
 public class SenderTest {
 
-	@SuppressWarnings("resource")
-	public static void main(String[] args) {
-		new ClassPathXmlApplicationContext("classpath:spring.xml");
-		for(int i = 0; i < 1000; i++) {
-			final int no = i;
-			Thread thread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					MessageSender.send("group1", "这是第" + no + "条测试消息");
-				}
-			});
-			thread.start();
-		}
-
-	}
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
+        final MessageSender messageSender = (MessageSender) applicationContext.getBean("messageSender");
+        for(int i = 0; i < 1000; i++) {
+            final int no = i;
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    messageSender.send("group1", "这是第" + no + "条测试消息");
+                }
+            });
+            thread.start();
+        }
+    }
 }

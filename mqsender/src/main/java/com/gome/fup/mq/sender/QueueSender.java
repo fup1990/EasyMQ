@@ -26,9 +26,9 @@ import com.gome.fup.mq.common.util.AddressUtil;
  */
 public class QueueSender {
 
-	private ExecutorService executorService = Executors.newFixedThreadPool(10); 
+	private ExecutorService executorService = Executors.newFixedThreadPool(16);
 	
-	private String serverAddr;
+	protected String serverAddr;
 
 	private Response response;
 

@@ -1,5 +1,8 @@
 package com.gome.fup.mq.common.handler;
 
+import com.gome.fup.mq.common.http.Response;
+import com.gome.fup.mq.common.util.ResponseUtil;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -27,6 +30,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Request> {
 	@Override
 	protected synchronized void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws Exception {
+		Response response = null;
 		if(request.getType() == Constant.REQUEST_TYPE_CALLBACK) {
 			Object msg = request.getMsg();
 			if(msg instanceof String) {				
@@ -40,12 +44,15 @@ public class ClientHandler extends SimpleChannelInboundHandler<Request> {
 							MessageReceiver receiver = entry.getValue();
 							logger.debug("消费端接收到消息，并执行。");
 							receiver.onMessage(new Message(data));
+							response = ResponseUtil.success("message received!!", request.getGroupName());
 							break;
 						}
 					}
 				}
 			}
+
 		}
+		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 	}
 
 	public ClientHandler(ApplicationContext applicationContext) {

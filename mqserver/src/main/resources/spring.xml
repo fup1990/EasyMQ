@@ -11,11 +11,11 @@
 	<context:property-placeholder location="classpath:config.properties"/>
 
 	<bean id="mqServer" class="com.gome.fup.mq.server.server.MQServer">
-		<property name="serverAddr" value="${config.serverAddr}"></property>
+		<property name="serverAddr" value="${config.serverAddr}"/>
 	</bean>
 	
-	<bean id="cache" class="com.gome.fup.mq.common.util.Cache"></bean>
+	<bean id="cache" class="com.gome.fup.mq.common.util.Cache"/>
 	
-	<bean id="callBack" class="com.gome.fup.mq.server.callback.CallBack"></bean>
+	<bean id="callBack" class="com.gome.fup.mq.server.callback.CallBack"/>
 	
 </beans>

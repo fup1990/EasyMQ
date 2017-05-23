@@ -7,7 +7,7 @@ package com.gome.fup.mq.common.util;
  */
 public class Constant {
 
-	public static final int SECCUESS = 200;
+	public static final int SUCCESS = 200;
 	
 	public static final int FAIL = 500;
 	

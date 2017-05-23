@@ -6,15 +6,12 @@
        http://www.springframework.org/schema/context
        http://www.springframework.org/schema/context/spring-context.xsd">
 
+	<context:component-scan base-package="com.gome.fup.mq"/>
 
 	<context:property-placeholder location="classpath:config.properties" />
 
-	<bean id="queueSender" class="com.gome.fup.mq.sender.QueueSender">
-		<property name="serverAddr" value="${config.serverAddr}"></property>
+	<bean id="messageSender" class="com.gome.fup.mq.sender.MessageSender">
+		<property name="serverAddr" value="${config.serverAddr}"/>
 	</bean>
-	
-	<bean id="messageSender" class="com.gome.fup.mq.client.util.MessageSender">
-		<property name="queueSender" ref="queueSender"></property>
-	</bean>
-	
+
 </beans>

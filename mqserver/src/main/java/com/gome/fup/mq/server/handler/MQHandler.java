@@ -1,5 +1,6 @@
 package com.gome.fup.mq.server.handler;
 
+import com.gome.fup.mq.common.util.ResponseUtil;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -60,11 +61,8 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 		logger.debug("MQ服务器接收到消息，并将消息存入队列中。");
 		queue.put(request.getMsg());
-		Response response = new Response();
-		response.setData("mq already recieved message!!");
-		response.setGroupName(request.getGroupName());
-		response.setStatus(Constant.SECCUESS);
-		return response;
+
+		return ResponseUtil.success("mq already recieved message!!", request.getGroupName());
 	}
 
 	private Response cacheListener(ChannelHandlerContext ctx, Request request) throws Exception {
@@ -82,11 +80,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		}
 		logger.debug("MQ服务器接收到消息消费者的监听记录。");
 
-		Response response = new Response();
-		response.setData("Listener already Registed in server cache!!");
-		response.setGroupName(request.getGroupName());
-		response.setStatus(Constant.SECCUESS);
-		return response;
+		return ResponseUtil.success("Listener already Registed in server cache!!", request.getGroupName());
 	}
 
 	public Map<String, Queue<String>> getCacheQueue() {

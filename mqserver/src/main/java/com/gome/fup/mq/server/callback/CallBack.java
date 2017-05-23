@@ -23,10 +23,12 @@ import com.gome.fup.mq.common.http.Response;
  * @author fupeng-ds
  */
 public class CallBack {
-	
-	private static ExecutorService executorService = Executors.newFixedThreadPool(1000);
 
-	public static void callback(final String host, final int port, final Request request) {
+	private static CallBack callBack = new CallBack();
+
+	private ExecutorService executorService = Executors.newFixedThreadPool(16);
+
+	public void callback(final String host, final int port, final Request request) {
 		executorService.submit(new Runnable() {
 			
 			@Override
@@ -55,6 +57,12 @@ public class CallBack {
 				}
 			}
 		});
-		
+	}
+
+	public static CallBack getCallBack() {
+		return callBack;
+	}
+
+	private CallBack() {
 	}
 }

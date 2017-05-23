@@ -55,7 +55,7 @@ public class QueueObserver implements Observer {
 		Request request = new Request();
 		request.setMsg(listener.getName() + ":" + msg);
 		request.setType(Constant.REQUEST_TYPE_CALLBACK);
-		CallBack.callback(host, port, request);
+		CallBack.getCallBack().callback(host, port, request);
 	}
 
 	

@@ -10,23 +10,23 @@
 	<context:property-placeholder location="classpath:config.properties" />
 
 	<bean id="listenerRegister" class="com.gome.fup.mq.register.ListenerRegister">
-		<property name="localAddr" value="${config.localAddr}"></property>
-		<property name="sender" ref="queueSender"></property>
+		<property name="localAddr" value="${config.localAddr}"/>
+		<property name="sender" ref="queueSender"/>
 	</bean>
 	
 	<bean id="queueSender" class="com.gome.fup.mq.sender.QueueSender">
-		<property name="serverAddr" value="${config.serverAddr}"></property>
+		<property name="serverAddr" value="${config.serverAddr}"/>
 	</bean>
 	
 	<bean id="receiveTest" class="com.gome.fup.mq.receiver.test.ReceiveTest">
-		<property name="groupName" value="group1"></property>
+		<property name="groupName" value="group1"/>
 	</bean>
 	
 	<bean id="clientServer" class="com.gome.fup.mq.client.ClientServer">
-		<property name="localAddr" value="${config.localAddr}"></property>
+		<property name="localAddr" value="${config.localAddr}"/>
 	</bean>
 	
 	<bean id="receiveTest2" class="com.gome.fup.mq.receiver.test.ReceiveTest2">
-		<property name="groupName" value="group2"></property>
+		<property name="groupName" value="group2"/>
 	</bean>
 </beans>
