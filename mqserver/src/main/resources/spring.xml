@@ -14,8 +14,4 @@
 		<property name="serverAddr" value="${config.serverAddr}"/>
 	</bean>
 	
-	<bean id="cache" class="com.gome.fup.mq.common.util.Cache"/>
-	
-	<bean id="callBack" class="com.gome.fup.mq.server.callback.CallBack"/>
-	
 </beans>
