@@ -32,25 +32,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<Request> {
 			throws Exception {
 		Response response = null;
 		if(request.getType() == Constant.REQUEST_TYPE_CALLBACK) {
-			Object msg = request.getMsg();
-			if(msg instanceof String) {				
-				String[] split = ((String)msg).split(":");
-				if(split != null && split.length == 2) {				
-					String className = split[0];
-					String data = split[1];
-					Map<String, MessageReceiver> map = applicationContext.getBeansOfType(MessageReceiver.class);
-					for(Map.Entry<String, MessageReceiver> entry : map.entrySet()) {
-						if(className.equals(entry.getValue().getClass().getName())) {
-							MessageReceiver receiver = entry.getValue();
-							logger.debug("消费端接收到消息，并执行。");
-							receiver.onMessage(new Message(data));
-							response = ResponseUtil.success("message received!!", request.getGroupName());
-							break;
-						}
+			if(request.getMsg() instanceof String) {
+				String className = request.getListenerName();
+				String data = request.getMsg();
+				Map<String, MessageReceiver> map = applicationContext.getBeansOfType(MessageReceiver.class);
+				for(Map.Entry<String, MessageReceiver> entry : map.entrySet()) {
+					if(className.equals(entry.getValue().getClass().getName())) {
+						MessageReceiver receiver = entry.getValue();
+						logger.debug("消费端接收到消息，并执行。");
+						receiver.onMessage(new Message(data));
+						response = ResponseUtil.success("message received!!", request.getGroupName());
+						break;
 					}
 				}
 			}
-
 		}
 		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 	}
