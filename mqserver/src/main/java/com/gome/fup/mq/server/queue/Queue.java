@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.gome.fup.mq.common.util.Cache;
 import com.gome.fup.mq.server.observer.Observable;
 import com.gome.fup.mq.server.observer.Observer;
+import com.gome.fup.mq.server.observer.QueueObserver;
 
 /**
  * 自定义消息队列
@@ -41,9 +42,11 @@ public class Queue<E> extends LinkedBlockingQueue<E> implements Observable{
 		}
 	}
 
-	public Queue() {
+	public Queue(String groupName) {
 		super();
-		this.list = new LinkedList<Observer>();
+		this.groupName = groupName;
+		this.list = new LinkedList<>();
+		addObserver(new QueueObserver());
 	}
 
 	@Override

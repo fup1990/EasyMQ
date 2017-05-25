@@ -54,9 +54,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		String groupName = request.getGroupName();
 		Queue<String> queue = cacheQueue.get(groupName);
 		if (queue == null) {
-			queue = new Queue<String>();
-			queue.setGroupName(groupName);
-			queue.addObserver(new QueueObserver());
+			queue = new Queue<>(groupName);
 			cacheQueue.put(groupName, queue);
 		}
 
