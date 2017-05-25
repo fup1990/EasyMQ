@@ -1,6 +1,7 @@
 package com.gome.fup.mq.server.handler;
 
 import com.gome.fup.mq.common.util.ResponseUtil;
+import com.gome.fup.mq.server.util.SendUtil;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,19 +38,19 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx,
+	protected synchronized void channelRead0(ChannelHandlerContext ctx,
 			Request request) throws Exception {
 		Response response = null;
 		if (request.getType() == Constant.REQUEST_TYPE_MSG) {	//接收到消息
-			response = putRequestInQueue(ctx, request);
+			response = putRequestInQueue(request);
 		}
 		if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
-			response = cacheListener(ctx, request);
+			response = cacheListener(request);
 		}
 		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 	}
 
-	private Response putRequestInQueue(ChannelHandlerContext ctx, Request request) throws Exception{
+	private Response putRequestInQueue(Request request) throws Exception{
 		String groupName = request.getGroupName();
 		Queue<String> queue = cacheQueue.get(groupName);
 		if (queue == null) {
@@ -61,11 +62,10 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 		logger.debug("MQ服务器接收到消息，并将消息存入队列中。");
 		queue.put(request.getMsg());
-
 		return ResponseUtil.success("mq already recieved message!!", request.getGroupName());
 	}
 
-	private Response cacheListener(ChannelHandlerContext ctx, Request request) throws Exception {
+	private Response cacheListener(Request request) throws Exception {
 		String msg = request.getMsg();
 		// byte[] bytes = msg.getBytes("UTF-8");
 		byte[] bytes = Base64.decode(msg);
@@ -77,6 +77,10 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 			 */
 		for (Map.Entry<String, List<Listener>> entry : multimap.entrySet()) {
 			Cache.getCache().set(entry.getKey(), entry.getValue());
+			//队列中已经有消息
+			if (cacheQueue.keySet().contains(entry.getKey())) {
+				SendUtil.sendMsgToListener(cacheQueue.get(entry.getKey()), entry.getValue());
+			}
 		}
 		logger.debug("MQ服务器接收到消息消费者的监听记录。");
 
