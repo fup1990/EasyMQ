@@ -1,8 +1,10 @@
 package com.gome.fup.mq.server.observer;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.gome.fup.mq.common.exception.NoServerAddrException;
+import com.gome.fup.mq.server.util.SendUtil;
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
@@ -21,42 +23,13 @@ import com.gome.fup.mq.server.queue.Queue;
 public class QueueObserver implements Observer {
 	
 	private final Logger logger = Logger.getLogger(this.getClass());
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public void update(Observable o, Object arg) {
+	public synchronized void update(Observable o, Object arg) {
 		Queue<String> queue = (Queue<String>)o;
-		try {
-			String groupName = (String) arg;
-			Collection<Listener> collection = (Collection<Listener>) Cache.getCache().get(groupName);
-			String msg = queue.take();
-			if(collection != null && collection.size() != 0) {
-				for (Listener listener : collection) {
-					logger.debug("将消息发送给消费者。");
-					try {
-						sendMsgToListener(listener, msg);
-					} catch (NoServerAddrException e) {
-						e.printStackTrace();
-						logger.error(e.getMessage());
-					}
-					break;
-				}
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		String groupName = (String) arg;
+		List<Listener> collection = (List<Listener>) Cache.getCache().get(groupName);
+		SendUtil.sendMsgToListener(queue, collection);
 	}
-
-	private void sendMsgToListener(Listener listener, String msg) throws NoServerAddrException {
-		String[] arr = AddressUtil.getServerAddr(listener.getAddr());
-		if (null == arr) throw new NoServerAddrException("服务地址未加载异常");
-		String host = arr[0];
-		int port = Integer.parseInt(arr[1]);
-		Request request = new Request();
-		request.setMsg(listener.getName() + ":" + msg);
-		request.setType(Constant.REQUEST_TYPE_CALLBACK);
-		CallBack.getCallBack().callback(host, port, request);
-	}
-
-	
 }
