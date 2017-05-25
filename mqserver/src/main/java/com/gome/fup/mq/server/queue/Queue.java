@@ -1,9 +1,11 @@
 package com.gome.fup.mq.server.queue;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.gome.fup.mq.common.util.Cache;
 import com.gome.fup.mq.server.observer.Observable;
 import com.gome.fup.mq.server.observer.Observer;
 
@@ -47,8 +49,10 @@ public class Queue<E> extends LinkedBlockingQueue<E> implements Observable{
 	@Override
 	public void put(E e) throws InterruptedException {
 		super.put(e);
-		setChange();
-		notifyObservers();
+		if (Cache.getCache().hasKey(groupName)) {
+			setChange();
+			notifyObservers();
+		}
 	}
 
 	public synchronized void addObserver(Observer observer) {
