@@ -18,6 +18,8 @@ public class Request implements Serializable{
 	private String msg;
 	
 	private Integer type;
+
+	private String listenerName;
 	
 	public String getId() {
 		return id;
@@ -61,8 +63,12 @@ public class Request implements Serializable{
 		return "Request [id=" + id + ", groupName=" + groupName + ", msg="
 				+ msg + ", type=" + type + "]";
 	}
-	
-	
-	
-	
+
+	public String getListenerName() {
+		return listenerName;
+	}
+
+	public void setListenerName(String listenerName) {
+		this.listenerName = listenerName;
+	}
 }
