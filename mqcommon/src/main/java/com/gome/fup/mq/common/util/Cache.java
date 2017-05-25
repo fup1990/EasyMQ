@@ -1,5 +1,7 @@
 package com.gome.fup.mq.common.util;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -45,5 +47,13 @@ public class Cache {
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	public boolean hasKey(String key) {
+		Set<String> keySet = loadingCache.asMap().keySet();
+		if (keySet.contains(key)) {
+			return true;
+		}
+		return false;
 	}
 }
