@@ -1,7 +1,6 @@
 package com.gome.fup.mq.client.test;
 
 import com.gome.fup.mq.sender.MessageSender;
-import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
