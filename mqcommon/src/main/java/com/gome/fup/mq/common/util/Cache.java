@@ -1,6 +1,7 @@
 package com.gome.fup.mq.common.util;
 
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -32,11 +33,11 @@ public class Cache {
 		return cache;
 	}
 	
-	public void set(String key, Object value) {
+	public synchronized void set(String key, Object value) {
 		loadingCache.put(key, value);
 	}
 	
-	public Object get(String key) {
+	public synchronized Object get(String key) {
 		Object result = null;
 		try {
 			result = loadingCache.get(key);

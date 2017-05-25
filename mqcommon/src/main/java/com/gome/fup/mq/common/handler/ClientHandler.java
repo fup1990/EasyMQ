@@ -28,7 +28,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Request> {
 	private ApplicationContext applicationContext;
 	
 	@Override
-	protected synchronized void channelRead0(ChannelHandlerContext ctx, Request request)
+	protected void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws Exception {
 		Response response = null;
 		if(request.getType() == Constant.REQUEST_TYPE_CALLBACK) {

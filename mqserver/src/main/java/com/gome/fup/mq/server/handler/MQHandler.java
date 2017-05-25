@@ -37,7 +37,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected synchronized void channelRead0(ChannelHandlerContext ctx,
+	protected void channelRead0(ChannelHandlerContext ctx,
 			Request request) throws Exception {
 		Response response = null;
 		if (request.getType() == Constant.REQUEST_TYPE_MSG) {	//接收到消息
