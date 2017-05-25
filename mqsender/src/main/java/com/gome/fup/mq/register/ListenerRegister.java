@@ -21,7 +21,7 @@ import com.gome.fup.mq.common.model.Listener;
  *
  * @author fupeng-ds
  */
-public class ListenerRegister extends AbstractRegister implements Runnable, ApplicationContextAware, InitializingBean{
+public class ListenerRegister extends AbstractRegister implements Runnable, InitializingBean{
 	
 	private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -30,29 +30,20 @@ public class ListenerRegister extends AbstractRegister implements Runnable, Appl
 	//private Multimap<String, Listener> multimap = ArrayListMultimap.create();
 	private Map<String, List<Listener>> multimap = new HashMap<String, List<Listener>>();
 	
-	private ApplicationContext applicationContext;
-	
-	private String localAddr;
-
 	public void afterPropertiesSet() throws Exception {
 		executorService.submit(this);
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	public String getLocalAddr() {
-		return localAddr;
-	}
-
-	public void setLocalAddr(String localAddr) {
-		this.localAddr = localAddr;
-	}
-
-
 	public void run() {
+		//获取监听实现
+		getListeners();
+		//发送给mq服务端
+		sendListenerToMQServer(multimap);
+		//启动本地服务
+		startCliendServer();
+	}
+
+	private void getListeners() {
 		logger.debug("获取消息监听。");
 		//获取所有继承了监听的实现
 		Map<String, MessageReceiver> map = applicationContext.getBeansOfType(MessageReceiver.class);
@@ -71,7 +62,5 @@ public class ListenerRegister extends AbstractRegister implements Runnable, Appl
 			}
 		}
 		logger.debug("开始向MQ服务器注册监听。");
-		//发送给mq服务端
-		sendListenerToMQServer(multimap);
 	}
 }

@@ -22,10 +22,6 @@
 		<property name="groupName" value="group1"/>
 	</bean>
 	
-	<bean id="clientServer" class="com.gome.fup.mq.client.ClientServer">
-		<property name="localAddr" value="${config.localAddr}"/>
-	</bean>
-	
 	<bean id="receiveTest2" class="com.gome.fup.mq.receiver.test.ReceiveTest2">
 		<property name="groupName" value="group2"/>
 	</bean>
