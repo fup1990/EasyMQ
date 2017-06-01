@@ -1,5 +1,6 @@
 package com.gome.fup.mq.common.util;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -56,4 +57,5 @@ public class Cache {
 		}
 		return false;
 	}
+
 }

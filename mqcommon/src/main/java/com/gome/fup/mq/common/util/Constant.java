@@ -15,5 +15,9 @@ public class Constant {
 	
 	public static final int REQUEST_TYPE_MSG = 0;
 	
-	public static final int REQUEST_TYPE_CALLBACK = 3; 
+	public static final int REQUEST_TYPE_CALLBACK = 3;
+
+	public static final int REQUEST_TYPE_HEART = 4;
+
+	public static final String  LISTENER_IN_CACHE = "LISTENER_IN_CACHE";
 }

@@ -2,8 +2,10 @@ package com.gome.fup.mq.server.observer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.gome.fup.mq.common.exception.NoServerAddrException;
+import com.gome.fup.mq.common.util.RandomUtil;
 import com.gome.fup.mq.server.util.SendUtil;
 import org.apache.log4j.Logger;
 

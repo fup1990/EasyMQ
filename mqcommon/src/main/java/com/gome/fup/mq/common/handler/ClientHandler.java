@@ -2,12 +2,17 @@ package com.gome.fup.mq.common.handler;
 
 import com.gome.fup.mq.common.http.Response;
 import com.gome.fup.mq.common.util.ResponseUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.Map;
 
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.CharsetUtil;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
@@ -53,5 +58,4 @@ public class ClientHandler extends SimpleChannelInboundHandler<Request> {
 	public ClientHandler(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-
 }

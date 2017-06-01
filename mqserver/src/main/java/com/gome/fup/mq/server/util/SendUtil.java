@@ -5,6 +5,7 @@ import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.model.Listener;
 import com.gome.fup.mq.common.util.AddressUtil;
 import com.gome.fup.mq.common.util.Constant;
+import com.gome.fup.mq.common.util.RandomUtil;
 import com.gome.fup.mq.server.callback.CallBack;
 import com.gome.fup.mq.server.queue.Queue;
 import org.apache.log4j.Logger;
@@ -18,26 +19,21 @@ public class SendUtil {
 
     private static Logger logger = Logger.getLogger(SendUtil.class);
 
-    public static void sendMsgToListener(Queue<String> queue, List<Listener> list) {
+    public static void sendMsgToListener(Queue<String> queue, List<Listener> listeners) {
         try {
+            if (null == listeners || listeners.size() == 0) {
+                return;
+            }
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 String msg = queue.take();
-                if(list != null && list.size() != 0) {
-                    for (Listener listener : list) {
-                        logger.debug("将消息发送给消费者。");
-                        try {
-                            sendMsg(listener, msg);
-                        } catch (NoServerAddrException e) {
-                            e.printStackTrace();
-                            logger.error(e.getMessage());
-                        }
-                        break;
-                    }
-                }
+                logger.debug("将消息发送给消费者。");
+                int index = RandomUtil.random(listeners.size());
+                sendMsg(listeners.get(index), msg);
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -52,4 +48,5 @@ public class SendUtil {
         request.setType(Constant.REQUEST_TYPE_CALLBACK);
         CallBack.getCallBack().callback(host, port, request);
     }
+
 }
