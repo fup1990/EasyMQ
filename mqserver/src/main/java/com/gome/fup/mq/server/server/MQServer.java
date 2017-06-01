@@ -1,5 +1,6 @@
 package com.gome.fup.mq.server.server;
 
+import com.gome.fup.mq.server.handler.HeartServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -13,7 +14,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -67,9 +70,11 @@ public class MQServer implements Runnable, InitializingBean {
 						protected void initChannel(SocketChannel socketChannel)
 								throws Exception {
 							socketChannel.pipeline()
+									.addLast(new IdleStateHandler(5,0,0, TimeUnit.SECONDS))
 									.addLast(new DecoderHandler(Request.class))
 									.addLast(new EncoderHandler())
-									.addLast(new MQHandler(cacheQueue));
+									.addLast(new MQHandler(cacheQueue))
+									.addLast(new HeartServerHandler());
 						}
 					}).option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -89,4 +94,6 @@ public class MQServer implements Runnable, InitializingBean {
 			bossGroup.shutdownGracefully();
 		}
 	}
+
+
 }

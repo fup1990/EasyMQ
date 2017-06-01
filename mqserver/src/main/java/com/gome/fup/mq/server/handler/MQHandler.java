@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.log4j.Logger;
@@ -40,14 +42,15 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 	@Override
 	protected synchronized void channelRead0(ChannelHandlerContext ctx,
 			Request request) throws Exception {
-		Response response = null;
+		Response response;
 		if (request.getType() == Constant.REQUEST_TYPE_MSG) {	//接收到消息
 			response = putRequestInQueue(request);
+			ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 		}
 		if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
-			response = cacheListener(request);
+			cacheListener(request);
 		}
-		ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+
 	}
 
 	private Response putRequestInQueue(Request request) throws Exception{
@@ -65,16 +68,17 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 	private Response cacheListener(Request request) throws Exception {
 		String msg = request.getMsg();
-		// byte[] bytes = msg.getBytes("UTF-8");
 		byte[] bytes = Base64.decode(msg);
 		Map<String, List<Listener>> multimap = KryoUtil.byteToObj(bytes, HashMap.class);
-			/*
-			 * Multiset<String> keys = multimap.keys(); for (String groupName :
-			 * keys) { Collection<Listener> collection =
-			 * multimap.get(groupName); cache.set(groupName, collection); }
-			 */
 		for (Map.Entry<String, List<Listener>> entry : multimap.entrySet()) {
-			Cache.getCache().set(entry.getKey(), entry.getValue());
+			List<Listener> list;
+			if (Cache.getCache().hasKey(entry.getKey())) {
+				list = (List<Listener>) Cache.getCache().get(entry.getKey());
+				list.addAll(entry.getValue());
+			} else {
+				list = entry.getValue();
+			}
+			Cache.getCache().set(entry.getKey(), list);
 			//队列中已经有消息
 			if (cacheQueue.keySet().contains(entry.getKey())) {
 				SendUtil.sendMsgToListener(cacheQueue.get(entry.getKey()), entry.getValue());
@@ -97,5 +101,4 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		super();
 		this.cacheQueue = cacheQueue;
 	}
-
 }

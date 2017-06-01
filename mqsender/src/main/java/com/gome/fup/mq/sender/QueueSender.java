@@ -1,6 +1,7 @@
 package com.gome.fup.mq.sender;
 
 import com.gome.fup.mq.common.exception.NoServerAddrException;
+import com.gome.fup.mq.common.handler.HeartClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,12 +13,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.gome.fup.mq.common.handler.DecoderHandler;
 import com.gome.fup.mq.common.handler.EncoderHandler;
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.http.Response;
 import com.gome.fup.mq.common.util.AddressUtil;
+import io.netty.handler.timeout.IdleStateHandler;
 
 /**
  * 
@@ -48,8 +51,10 @@ public class QueueSender {
 								protected void initChannel(SocketChannel ch)
 										throws Exception {
 									ch.pipeline()
+											.addLast(new IdleStateHandler(0,4,0, TimeUnit.SECONDS))
 											.addLast(new EncoderHandler())
-											.addLast(new DecoderHandler(Response.class));
+											.addLast(new DecoderHandler(Response.class))
+											.addLast(new HeartClientHandler());
 									// .addLast(QueueSender.this);
 								}
 							}).option(ChannelOption.SO_KEEPALIVE, true);
