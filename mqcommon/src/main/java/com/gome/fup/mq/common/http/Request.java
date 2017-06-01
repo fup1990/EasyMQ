@@ -58,17 +58,22 @@ public class Request implements Serializable{
 		this.type = type;
 	}
 
-	@Override
-	public String toString() {
-		return "Request [id=" + id + ", groupName=" + groupName + ", msg="
-				+ msg + ", type=" + type + "]";
-	}
-
 	public String getListenerName() {
 		return listenerName;
 	}
 
 	public void setListenerName(String listenerName) {
 		this.listenerName = listenerName;
+	}
+
+	@Override
+	public String toString() {
+		return "Request{" +
+				"id='" + id + '\'' +
+				", groupName='" + groupName + '\'' +
+				", msg='" + msg + '\'' +
+				", type=" + type +
+				", listenerName='" + listenerName + '\'' +
+				'}';
 	}
 }
