@@ -70,11 +70,11 @@ public class MQServer implements Runnable, InitializingBean {
 						protected void initChannel(SocketChannel socketChannel)
 								throws Exception {
 							socketChannel.pipeline()
-									.addLast(new IdleStateHandler(5,0,0, TimeUnit.SECONDS))
+									//.addLast(new IdleStateHandler(5,0,0, TimeUnit.SECONDS))
 									.addLast(new DecoderHandler(Request.class))
 									.addLast(new EncoderHandler())
-									.addLast(new MQHandler(cacheQueue))
-									.addLast(new HeartServerHandler());
+									.addLast(new MQHandler(cacheQueue));
+									//.addLast(new HeartServerHandler());
 						}
 					}).option(ChannelOption.SO_BACKLOG, 128)
 					.childOption(ChannelOption.SO_KEEPALIVE, true);
