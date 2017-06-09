@@ -11,10 +11,10 @@
 
 	<bean id="listenerRegister" class="com.gome.fup.mq.register.ListenerRegister">
 		<property name="localAddr" value="${config.localAddr}"/>
-		<property name="sender" ref="queueSender"/>
+		<property name="messageSender" ref="messageSender"/>
 	</bean>
-	
-	<bean id="queueSender" class="com.gome.fup.mq.sender.QueueSender">
+
+	<bean id="messageSender" class="com.gome.fup.mq.sender.MessageSender">
 		<property name="serverAddr" value="${config.serverAddr}"/>
 	</bean>
 	

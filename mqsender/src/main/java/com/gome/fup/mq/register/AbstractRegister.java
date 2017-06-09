@@ -2,20 +2,17 @@ package com.gome.fup.mq.register;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.gome.fup.mq.common.handler.ClientHandler;
 import com.gome.fup.mq.common.handler.DecoderHandler;
 import com.gome.fup.mq.common.handler.EncoderHandler;
-import com.gome.fup.mq.common.handler.HeartClientHandler;
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.model.Listener;
 import com.gome.fup.mq.common.util.AddressUtil;
 import com.gome.fup.mq.common.util.Constant;
-import com.gome.fup.mq.common.util.KryoUtil;
 import com.gome.fup.mq.common.util.RequestUtil;
-import com.gome.fup.mq.sender.QueueSender;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import com.gome.fup.mq.sender.AbstractSender;
+import com.gome.fup.mq.sender.MessageSender;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -24,7 +21,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -34,9 +30,9 @@ import org.springframework.context.ApplicationContextAware;
  *
  * @author fupeng-ds
  */
-public abstract class AbstractRegister implements ApplicationContextAware{
+public abstract class AbstractRegister extends AbstractSender implements ApplicationContextAware{
 
-	private QueueSender sender;
+	private MessageSender messageSender;
 
 	protected String localAddr;
 
@@ -44,7 +40,8 @@ public abstract class AbstractRegister implements ApplicationContextAware{
 
 	protected void sendListenerToMQServer(Map<String, List<Listener>> multimap) {
 		Request request = RequestUtil.buildRequst(multimap, Constant.REQUEST_TYPE_LISTENER);
-		sender.send(request);
+		//sender.send(request);
+		messageSender.send(request);
 	}
 
 	protected void startCliendServer() {
@@ -80,14 +77,6 @@ public abstract class AbstractRegister implements ApplicationContextAware{
 		}
 	}
 
-	public QueueSender getSender() {
-		return sender;
-	}
-
-	public void setSender(QueueSender sender) {
-		this.sender = sender;
-	}
-
 	public String getLocalAddr() {
 		return localAddr;
 	}
@@ -98,5 +87,13 @@ public abstract class AbstractRegister implements ApplicationContextAware{
 
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+
+	public MessageSender getMessageSender() {
+		return messageSender;
+	}
+
+	public void setMessageSender(MessageSender messageSender) {
+		this.messageSender = messageSender;
 	}
 }

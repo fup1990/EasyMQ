@@ -1,7 +1,6 @@
 package com.gome.fup.mq.sender;
 
 import com.gome.fup.mq.common.exception.NoServerAddrException;
-import com.gome.fup.mq.common.handler.HeartClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -11,16 +10,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import com.gome.fup.mq.common.handler.DecoderHandler;
 import com.gome.fup.mq.common.handler.EncoderHandler;
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.http.Response;
 import com.gome.fup.mq.common.util.AddressUtil;
-import io.netty.handler.timeout.IdleStateHandler;
 
 /**
  * 
@@ -29,63 +23,59 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public class QueueSender {
 
-	private ExecutorService executorService = Executors.newFixedThreadPool(16);
-	
-	protected String serverAddr;
+	private Request request;
+
+	private String serverAddr;
 
 	private Response response;
 
 	// private final Object obj = new Object();
 
-	public void send(final Request request) {
-		executorService.submit(new Runnable() {
-			
-			public void run() {
-				EventLoopGroup group = new NioEventLoopGroup();
-				try {
-					Bootstrap bootstrap = new Bootstrap();
-					bootstrap.group(group).channel(NioSocketChannel.class)
-							.handler(new ChannelInitializer<SocketChannel>() {
+	public void send() {
 
-								@Override
-								protected void initChannel(SocketChannel ch)
-										throws Exception {
-									ch.pipeline()
-											.addLast(new IdleStateHandler(0,4,0, TimeUnit.SECONDS))
-											.addLast(new EncoderHandler())
-											.addLast(new DecoderHandler(Response.class))
-											.addLast(new HeartClientHandler());
-									// .addLast(QueueSender.this);
-								}
-							}).option(ChannelOption.SO_KEEPALIVE, true);
-					String[] addr = AddressUtil.getServerAddr(serverAddr);
-					if (null == addr) {
-						throw new NoServerAddrException("服务地址未加载异常");
-					}
-					String host = addr[0];
-					Integer port = Integer.parseInt(addr[1]);
-					// 链接服务器
-					ChannelFuture future = bootstrap.connect(host, port).sync();
-					// 将request对象写入outbundle处理后发出
-					future.channel().writeAndFlush(request).sync();
+		EventLoopGroup group = new NioEventLoopGroup();
+		try {
+			Bootstrap bootstrap = new Bootstrap();
+			bootstrap.group(group).channel(NioSocketChannel.class)
+					.handler(new ChannelInitializer<SocketChannel>() {
 
-					// synchronized (obj) {
-					// 用线程等待的方式决定是否关闭连接
-					// 其意义是：先在此阻塞，等待获取到服务端的返回后，被唤醒，从而关闭网络连接
-					// obj.wait();
-					// }
-
-					// if (response != null) {
-					// 服务器同步连接断开时,这句代码才会往下执行
-					future.channel().closeFuture().sync();
-					// }
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					group.shutdownGracefully();
-				}
+						@Override
+						protected void initChannel(SocketChannel ch)
+								throws Exception {
+							ch.pipeline()
+									//.addLast(new IdleStateHandler(0,4,0, TimeUnit.SECONDS))
+									.addLast(new EncoderHandler())
+									.addLast(new DecoderHandler(Response.class));
+									//.addLast(new HeartClientHandler());
+							// .addLast(QueueSender.this);
+						}
+					}).option(ChannelOption.SO_KEEPALIVE, true);
+			String[] addr = AddressUtil.getServerAddr(serverAddr);
+			if (null == addr) {
+				throw new NoServerAddrException("服务地址未加载异常");
 			}
-		});
+			String host = addr[0];
+			Integer port = Integer.parseInt(addr[1]);
+			// 链接服务器
+			ChannelFuture future = bootstrap.connect(host, port).sync();
+			// 将request对象写入outbundle处理后发出
+			future.channel().writeAndFlush(request).sync();
+
+			// synchronized (obj) {
+			// 用线程等待的方式决定是否关闭连接
+			// 其意义是：先在此阻塞，等待获取到服务端的返回后，被唤醒，从而关闭网络连接
+			// obj.wait();
+			// }
+
+			// if (response != null) {
+			// 服务器同步连接断开时,这句代码才会往下执行
+			future.channel().closeFuture().sync();
+			// }
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			group.shutdownGracefully();
+		}
 	}
 
 	public String getServerAddr() {
@@ -119,4 +109,11 @@ public class QueueSender {
 		this.response = response;
 	}
 
+	public Request getRequest() {
+		return request;
+	}
+
+	public void setRequest(Request request) {
+		this.request = request;
+	}
 }
