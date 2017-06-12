@@ -51,6 +51,12 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- disruptor -->
+		<dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>3.2.0</version>
+		</dependency>
 		<!-- spring -->
 		<dependency>
 			<version>${spring.version}</version>
