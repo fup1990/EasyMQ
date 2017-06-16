@@ -1,15 +1,17 @@
 package com.gome.fup.mq.server.handler;
 
-import com.gome.fup.mq.common.util.ResponseUtil;
+import com.gome.fup.mq.common.util.*;
 import com.gome.fup.mq.server.util.SendUtil;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -20,12 +22,12 @@ import org.apache.log4j.Logger;
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.http.Response;
 import com.gome.fup.mq.common.model.Listener;
-import com.gome.fup.mq.common.util.Cache;
-import com.gome.fup.mq.common.util.Constant;
-import com.gome.fup.mq.common.util.KryoUtil;
 import com.gome.fup.mq.server.observer.QueueObserver;
 import com.gome.fup.mq.server.queue.Queue;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
 
 /**
  * 
@@ -47,9 +49,9 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 			response = putRequestInQueue(request);
 			ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 		}
-		if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
+		/*if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
 			cacheListener(request);
-		}
+		}*/
 
 	}
 
@@ -81,7 +83,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 			Cache.getCache().set(entry.getKey(), list);
 			//队列中已经有消息
 			if (cacheQueue.keySet().contains(entry.getKey())) {
-				SendUtil.sendMsgToListener(cacheQueue.get(entry.getKey()), entry.getValue());
+				//SendUtil.sendMsgToListener(cacheQueue.get(entry.getKey()), entry.getValue());
 			}
 		}
 		logger.debug("MQ服务器接收到消息消费者的监听记录。");

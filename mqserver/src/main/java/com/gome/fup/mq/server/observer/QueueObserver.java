@@ -1,8 +1,6 @@
 package com.gome.fup.mq.server.observer;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.gome.fup.mq.common.exception.NoServerAddrException;
 import com.gome.fup.mq.common.util.RandomUtil;
@@ -31,7 +29,6 @@ public class QueueObserver implements Observer {
 	public synchronized void update(Observable o, Object arg) {
 		Queue<String> queue = (Queue<String>)o;
 		String groupName = (String) arg;
-		List<Listener> collection = (List<Listener>) Cache.getCache().get(groupName);
-		SendUtil.sendMsgToListener(queue, collection);
+		SendUtil.sendMsgToListener(queue, groupName);
 	}
 }

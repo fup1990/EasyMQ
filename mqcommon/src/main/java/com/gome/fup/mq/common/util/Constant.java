@@ -20,4 +20,8 @@ public class Constant {
 	public static final int REQUEST_TYPE_HEART = 4;
 
 	public static final String  LISTENER_IN_CACHE = "LISTENER_IN_CACHE";
+
+	public static final int ZK_SESSION_TIMEOUT = 5000;
+
+	public static final String ZK_REGISTRY_PATH = "/registry";
 }
