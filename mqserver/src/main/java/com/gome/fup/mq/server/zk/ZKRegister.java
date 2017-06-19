@@ -101,6 +101,18 @@ public class ZKRegister implements InitializingBean{
                 }
             }
         });
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    zooKeeper.close();
+                    executorService.shutdown();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    logger.error(e.getMessage());
+                }
+            }
+        }));
     }
 
     private void cacheIps(String group) {

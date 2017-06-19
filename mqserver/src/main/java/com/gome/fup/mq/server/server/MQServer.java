@@ -1,6 +1,7 @@
 package com.gome.fup.mq.server.server;
 
 import com.gome.fup.mq.server.handler.HeartServerHandler;
+import com.lmax.disruptor.dsl.Disruptor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -41,7 +42,7 @@ public class MQServer implements Runnable, InitializingBean {
 	private Map<String, Queue<String>> cacheQueue = new ConcurrentHashMap<String, Queue<String>>();
 
 	private ExecutorService executorService = Executors.newSingleThreadExecutor();
-	
+
 	public void afterPropertiesSet() throws Exception {
 		executorService.submit(this);
 	}

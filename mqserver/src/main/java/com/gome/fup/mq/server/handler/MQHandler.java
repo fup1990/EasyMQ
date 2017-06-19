@@ -42,7 +42,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected synchronized void channelRead0(ChannelHandlerContext ctx,
+	protected void channelRead0(ChannelHandlerContext ctx,
 			Request request) throws Exception {
 		Response response;
 		if (request.getType() == Constant.REQUEST_TYPE_MSG) {	//接收到消息
@@ -59,10 +59,11 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		String groupName = request.getGroupName();
 		Queue<String> queue = cacheQueue.get(groupName);
 		if (queue == null) {
-			queue = new Queue<>(groupName);
-			cacheQueue.put(groupName, queue);
+			synchronized(this) {
+				queue = new Queue<>(groupName);
+				cacheQueue.put(groupName, queue);
+			}
 		}
-
 		logger.info("MQ服务器接收到消息，并将消息存入队列中。");
 		queue.put(request.getMsg());
 		return ResponseUtil.success("mq already recieved message!!", request.getGroupName());

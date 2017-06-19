@@ -31,7 +31,6 @@ public class SendUtil {
             for (int i = 0; i < size; i++) {
                 String msg = queue.take();
                 logger.debug("将消息发送给消费者。");
-
                 sendMsg(getLisenter(ips), msg);
             }
         } catch (Exception e) {

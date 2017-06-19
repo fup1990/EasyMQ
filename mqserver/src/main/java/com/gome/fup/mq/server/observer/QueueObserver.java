@@ -26,7 +26,7 @@ public class QueueObserver implements Observer {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized void update(Observable o, Object arg) {
+	public void update(Observable o, Object arg) {
 		Queue<String> queue = (Queue<String>)o;
 		String groupName = (String) arg;
 		SendUtil.sendMsgToListener(queue, groupName);
