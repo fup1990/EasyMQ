@@ -63,7 +63,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 			cacheQueue.put(groupName, queue);
 		}
 
-		logger.debug("MQ服务器接收到消息，并将消息存入队列中。");
+		logger.info("MQ服务器接收到消息，并将消息存入队列中。");
 		queue.put(request.getMsg());
 		return ResponseUtil.success("mq already recieved message!!", request.getGroupName());
 	}

@@ -65,8 +65,10 @@ public class ListenerRegister extends AbstractRegister implements Runnable, Init
 				String key = entry.getKey();
 				creatNode(PATH + "/" + key, null, CreateMode.PERSISTENT);
 				Set<String> set = entry.getValue();
-				List<String> list = new ArrayList<String>();
-				creatNode(PATH + "/" + key + "/" + localAddr, KryoUtil.objToByte(list.addAll(set)), CreateMode.EPHEMERAL);
+				ArrayList<String> list = new ArrayList<String>();
+				list.addAll(set);
+				byte[] bytes = KryoUtil.objToByte(list);
+				creatNode(PATH + "/" + key + "/" + localAddr, bytes, CreateMode.EPHEMERAL);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

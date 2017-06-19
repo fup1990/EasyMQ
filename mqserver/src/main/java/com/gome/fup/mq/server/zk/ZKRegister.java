@@ -64,18 +64,14 @@ public class ZKRegister implements InitializingBean{
                                         try {
                                             List<String> groups = zooKeeper.getChildren(event.getPath(), false);
                                             for (String group : groups) {
-                                                List<String> ips = zooKeeper.getChildren(event.getPath() + "/" + group, false);
-                                                //将队列名称与ip存入缓存
-                                                cache.set(group, ips);
-                                                for (String ip : ips) {
-                                                    byte[] bytes = zooKeeper.getData(PATH + '/' + group + "/" + ip, false, null);
-                                                    cache.set(ip, KryoUtil.byteToObj(bytes, Set.class));
-                                                }
+                                                cacheIps(group);
                                             }
                                         } catch (KeeperException e) {
                                             e.printStackTrace();
+                                            logger.error(e.getMessage());
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
+                                            logger.error(e.getMessage());
                                         }
                                     }
                                 }
@@ -86,34 +82,43 @@ public class ZKRegister implements InitializingBean{
                                     @Override
                                     public void process(WatchedEvent event) {
                                         if (event.getType() == Event.EventType.NodeChildrenChanged) {
-                                            try {
-                                                List<String> ips = zooKeeper.getChildren(event.getPath(), false);
-                                                //将队列名称与ip存入缓存
-                                                cache.set(group, ips);
-                                                for (String ip : ips) {
-                                                    byte[] bytes = zooKeeper.getData(PATH + '/' + group + "/" + ip, false, null);
-                                                    cache.set(ip, KryoUtil.byteToObj(bytes, ArrayList.class));
-                                                }
-                                            } catch (KeeperException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            cacheIps(group);
                                         }
                                     }
                                 });
                             }
                         } catch (KeeperException e) {
                             e.printStackTrace();
+                            logger.error(e.getMessage());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
+                            logger.error(e.getMessage());
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    logger.error(e.getMessage());
                 }
             }
         });
+    }
+
+    private void cacheIps(String group) {
+        try {
+            List<String> ips = zooKeeper.getChildren(PATH + "/" + group, false);
+            //将队列名称与ip存入缓存
+            cache.set(group, ips);
+            for (String ip : ips) {
+                byte[] bytes = zooKeeper.getData(PATH + '/' + group + "/" + ip, false, null);
+                cache.set(ip, KryoUtil.byteToObj(bytes, ArrayList.class));
+            }
+        } catch (KeeperException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
     }
 
     private String getGroup(String path) {
