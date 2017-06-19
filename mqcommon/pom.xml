@@ -44,6 +44,12 @@
 			<artifactId>guava</artifactId>
 			<version>19.0</version>
 		</dependency>
+		<!-- ZooKeeper -->
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.4.6</version>
+		</dependency>
 		<!-- junit -->
 		<dependency>
 			<groupId>junit</groupId>

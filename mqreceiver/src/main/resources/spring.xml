@@ -12,6 +12,7 @@
 	<bean id="listenerRegister" class="com.gome.fup.mq.register.ListenerRegister">
 		<property name="localAddr" value="${config.localAddr}"/>
 		<property name="messageSender" ref="messageSender"/>
+		<property name="zkServer" value="${config.zkServer}"/>
 	</bean>
 
 	<bean id="messageSender" class="com.gome.fup.mq.sender.MessageSender">
