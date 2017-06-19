@@ -1,5 +1,10 @@
 # EasyMQ
-# 实现简单的消息队列功能
+# 消息队列
+使用netty进行远程通信
+通过zookeeper进行消费者管理
+使用disruptor并发框架
+使用guava cache缓存
+使用kryo进行提高序列化性能
 
 # 模块介绍
 mqcommon是公共模块<br/>
