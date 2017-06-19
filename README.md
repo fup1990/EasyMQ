@@ -9,8 +9,8 @@ mqreceiver是消息接收端<br/>
 mqclient是消息发送端<br/>
 
 # 如何启动测试用例：<br/>
-  1、启动mqserver，clean package -D maven.test.skip=true tomcat7:run<br/>
-  2、启动消息消费端，clean package -D maven.test.skip=true tomcat7:run<br/>
-  3、执行mqclient客户中SenderTest的main方法<br/>
+  1、启动zookeeper，通过zookeeper管理消费者<br/>
+  2、启动mqserver，clean package -D maven.test.skip=true tomcat7:run<br/>
+  3、启动消息消费端，clean package -D maven.test.skip=true tomcat7:run<br/>
+  4、执行mqclient客户中SenderTest的main方法<br/>
  
-通过zookeeper管理消息消费者
