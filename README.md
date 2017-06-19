@@ -1,10 +1,10 @@
 # EasyMQ
 # 消息队列
-使用netty进行远程通信
-通过zookeeper进行消费者管理
-使用disruptor并发框架
-使用guava cache缓存
-使用kryo进行提高序列化性能
+使用netty进行远程通信<br/>
+通过zookeeper进行消费者管理<br/>
+使用disruptor并发框架<br/>
+使用guava cache缓存<br/>
+使用kryo进行提高序列化性能<br/>
 
 # 模块介绍
 mqcommon是公共模块<br/>
