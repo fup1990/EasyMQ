@@ -12,3 +12,5 @@ mqclient是消息发送端<br/>
   1、启动mqserver，clean package -D maven.test.skip=true tomcat7:run<br/>
   2、启动消息消费端，clean package -D maven.test.skip=true tomcat7:run<br/>
   3、执行mqclient客户中SenderTest的main方法<br/>
+ 
+通过zookeeper管理消息消费者
