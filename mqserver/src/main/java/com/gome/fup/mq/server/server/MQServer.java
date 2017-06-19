@@ -1,6 +1,9 @@
 package com.gome.fup.mq.server.server;
 
+import com.gome.fup.mq.sender.QueueSender;
 import com.gome.fup.mq.server.handler.HeartServerHandler;
+import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -43,8 +46,33 @@ public class MQServer implements Runnable, InitializingBean {
 
 	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+	private Disruptor<QueueSender> disruptor;
+
+	private int size = 1<<10;
+
+	private ExecutorService pool = Executors.newFixedThreadPool(16);
+
 	public void afterPropertiesSet() throws Exception {
 		executorService.submit(this);
+		disruptor = new Disruptor<QueueSender>(new EventFactory<QueueSender>() {
+			@Override
+			public QueueSender newInstance() {
+				return new QueueSender();
+			}
+		}, size, pool);
+		disruptor.handleEventsWith(new EventHandler<QueueSender>() {
+			@Override
+			public void onEvent(QueueSender queueSender, long l, boolean b) throws Exception {
+				queueSender.send();
+			}
+		});
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				disruptor.shutdown();
+				pool.shutdown();
+			}
+		}));
 	}
 
 	public String getServerAddr() {
@@ -74,7 +102,7 @@ public class MQServer implements Runnable, InitializingBean {
 									//.addLast(new IdleStateHandler(5,0,0, TimeUnit.SECONDS))
 									.addLast(new DecoderHandler(Request.class))
 									.addLast(new EncoderHandler())
-									.addLast(new MQHandler(cacheQueue));
+									.addLast(new MQHandler(cacheQueue, disruptor));
 									//.addLast(new HeartServerHandler());
 						}
 					}).option(ChannelOption.SO_BACKLOG, 128)
@@ -93,6 +121,7 @@ public class MQServer implements Runnable, InitializingBean {
 		} finally {
 			workerGroup.shutdownGracefully();
 			bossGroup.shutdownGracefully();
+			executorService.shutdown();
 		}
 	}
 

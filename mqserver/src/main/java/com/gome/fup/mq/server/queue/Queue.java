@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.gome.fup.mq.common.util.Cache;
+import com.gome.fup.mq.sender.QueueSender;
 import com.gome.fup.mq.server.observer.Observable;
 import com.gome.fup.mq.server.observer.Observer;
 import com.gome.fup.mq.server.observer.QueueObserver;
+import com.lmax.disruptor.dsl.Disruptor;
 
 /**
  * 自定义消息队列
@@ -21,6 +23,8 @@ public class Queue<E> extends LinkedBlockingQueue<E> implements Observable{
 	private boolean change = false;
 	
 	private List<Observer> list;
+
+	private Disruptor<QueueSender> disruptor;
 	
 	//组名
 	private String groupName;
@@ -42,11 +46,12 @@ public class Queue<E> extends LinkedBlockingQueue<E> implements Observable{
 		}
 	}
 
-	public Queue(String groupName) {
+	public Queue(Disruptor<QueueSender> disruptor, String groupName) {
 		super();
 		this.groupName = groupName;
+		this.disruptor = disruptor;
 		this.list = new LinkedList<>();
-		addObserver(new QueueObserver());
+		addObserver(new QueueObserver(disruptor));
 	}
 
 	@Override

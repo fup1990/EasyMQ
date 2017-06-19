@@ -1,33 +1,23 @@
 package com.gome.fup.mq.server.handler;
 
 import com.gome.fup.mq.common.util.*;
-import com.gome.fup.mq.server.util.SendUtil;
-import io.netty.channel.ChannelFuture;
+import com.gome.fup.mq.sender.QueueSender;
+import com.lmax.disruptor.dsl.Disruptor;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.http.Response;
 import com.gome.fup.mq.common.model.Listener;
-import com.gome.fup.mq.server.observer.QueueObserver;
 import com.gome.fup.mq.server.queue.Queue;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
 
 /**
  * 
@@ -39,6 +29,8 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 	private final Logger logger = Logger.getLogger(this.getClass());
 
 	private Map<String, Queue<String>> cacheQueue;
+
+	private Disruptor<QueueSender> disruptor;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -60,7 +52,7 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		Queue<String> queue = cacheQueue.get(groupName);
 		if (queue == null) {
 			synchronized(this) {
-				queue = new Queue<>(groupName);
+				queue = new Queue<>(disruptor, groupName);
 				cacheQueue.put(groupName, queue);
 			}
 		}
@@ -100,8 +92,9 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		this.cacheQueue = cacheQueue;
 	}
 
-	public MQHandler(Map<String, Queue<String>> cacheQueue) {
+	public MQHandler(Map<String, Queue<String>> cacheQueue, Disruptor<QueueSender> disruptor) {
 		super();
 		this.cacheQueue = cacheQueue;
+		this.disruptor = disruptor;
 	}
 }

@@ -14,8 +14,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.gome.fup.mq.common</groupId>
-			<artifactId>mqcommon</artifactId>
+			<groupId>com.gome.fup.mq.sender</groupId>
+			<artifactId>mqsender</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<!-- Netty -->
