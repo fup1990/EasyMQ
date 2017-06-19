@@ -41,10 +41,6 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 			response = putRequestInQueue(request);
 			ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 		}
-		/*if (request.getType() == Constant.REQUEST_TYPE_LISTENER) {	//接收到消费监听信息
-			cacheListener(request);
-		}*/
-
 	}
 
 	private Response putRequestInQueue(Request request) throws Exception{
@@ -59,29 +55,6 @@ public class MQHandler extends SimpleChannelInboundHandler<Request> {
 		logger.info("MQ服务器接收到消息，并将消息存入队列中。");
 		queue.put(request.getMsg());
 		return ResponseUtil.success("mq already recieved message!!", request.getGroupName());
-	}
-
-	private Response cacheListener(Request request) throws Exception {
-		String msg = request.getMsg();
-		byte[] bytes = Base64.decode(msg);
-		Map<String, List<Listener>> multimap = KryoUtil.byteToObj(bytes, HashMap.class);
-		for (Map.Entry<String, List<Listener>> entry : multimap.entrySet()) {
-			List<Listener> list;
-			if (Cache.getCache().hasKey(entry.getKey())) {
-				list = (List<Listener>) Cache.getCache().get(entry.getKey());
-				list.addAll(entry.getValue());
-			} else {
-				list = entry.getValue();
-			}
-			Cache.getCache().set(entry.getKey(), list);
-			//队列中已经有消息
-			if (cacheQueue.keySet().contains(entry.getKey())) {
-				//SendUtil.sendMsgToListener(cacheQueue.get(entry.getKey()), entry.getValue());
-			}
-		}
-		logger.debug("MQ服务器接收到消息消费者的监听记录。");
-
-		return ResponseUtil.success("Listener already Registed in server cache!!", request.getGroupName());
 	}
 
 	public Map<String, Queue<String>> getCacheQueue() {
