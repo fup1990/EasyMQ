@@ -37,6 +37,7 @@ public class ZKRegister implements InitializingBean{
             @Override
             public void run() {
                 try {
+                    hasRootPath();
                     zooKeeper = new ZooKeeper(host, SESSIONTIMEOUT, new Watcher() {
                         @Override
                         public void process(WatchedEvent event) {
@@ -146,4 +147,26 @@ public class ZKRegister implements InitializingBean{
         this.host = host;
     }
 
+    private void creatNode(String path,byte[] bytes, CreateMode createMode) throws KeeperException, InterruptedException {
+        Stat exists = zooKeeper.exists(path, false);
+        if (null == exists) {
+            zooKeeper.create(path,bytes, ZooDefs.Ids.OPEN_ACL_UNSAFE,createMode);
+        }
+    }
+
+    private void hasRootPath() {
+        try {
+            zooKeeper = new ZooKeeper("/", SESSIONTIMEOUT, null);
+            Stat exists = zooKeeper.exists(PATH, false);
+            if (null == exists) {
+                zooKeeper.create(PATH,null, ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
+            }
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
