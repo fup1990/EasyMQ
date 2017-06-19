@@ -42,9 +42,8 @@ public class SendUtil {
 
     private static Listener getLisenter(List<String> ips) {
         int random = RandomUtil.random(ips.size());
-        Set<String> classNames = (Set<String>) Cache.getCache().get(ips.get(random));
-        String[] objects = (String[]) classNames.toArray();
-        return new Listener(objects[random],ips.get(random));
+        List<String> classNames = (List<String>) Cache.getCache().get(ips.get(random));
+        return new Listener(classNames.get(random),ips.get(random));
     }
 
     private static void sendMsg(Listener listener, String msg) throws NoServerAddrException {
