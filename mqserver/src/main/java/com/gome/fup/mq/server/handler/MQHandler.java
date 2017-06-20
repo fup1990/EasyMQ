@@ -7,18 +7,13 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
 import com.gome.fup.mq.common.http.Response;
-import com.gome.fup.mq.common.model.Listener;
 import com.gome.fup.mq.server.queue.Queue;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-
 /**
  * 
  *

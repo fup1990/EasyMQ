@@ -29,7 +29,7 @@ public class ZKRegister implements InitializingBean{
 
     private Cache cache = Cache.getCache();
 
-    private final static int SESSIONTIMEOUT = 5000;
+    private final static int SESSIONTIMEOUT = 10000;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -123,7 +123,7 @@ public class ZKRegister implements InitializingBean{
             cache.set(group, ips);
             for (String ip : ips) {
                 byte[] bytes = zooKeeper.getData(PATH + '/' + group + "/" + ip, false, null);
-                cache.set(ip, KryoUtil.byteToObj(bytes, ArrayList.class));
+                cache.set(group + "_" + ip, KryoUtil.byteToObj(bytes, ArrayList.class));
             }
         } catch (KeeperException e) {
             e.printStackTrace();

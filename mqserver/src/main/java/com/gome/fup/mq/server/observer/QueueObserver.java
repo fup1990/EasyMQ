@@ -1,9 +1,6 @@
 package com.gome.fup.mq.server.observer;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.gome.fup.mq.common.exception.NoServerAddrException;
 import com.gome.fup.mq.common.util.RandomUtil;
 import com.gome.fup.mq.sender.QueueSender;
@@ -30,9 +27,7 @@ public class QueueObserver implements Observer {
 
 	private RingBuffer<QueueSender> ringBuffer;
 
-	private int size = 1<<10;
-
-	private ExecutorService executorService = Executors.newFixedThreadPool(16);
+	private Cache cache = Cache.getCache();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -44,12 +39,13 @@ public class QueueObserver implements Observer {
 
 	private void sendMsgToListener(Queue<String> queue, String groupName) {
 		try {
-			List<String> ips = (List<String>) Cache.getCache().get(groupName);
+			List<String> ips = (List<String>) cache.get(groupName);
 			int size = queue.size();
 			for (int i = 0; i < size; i++) {
 				String msg = queue.take();
 				logger.debug("将消息发送给消费者。");
-				sendMsg(getLisenter(ips), msg);
+				//sendMsg(getLisenter(groupName,ips), msg);
+				send(groupName,ips,msg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -57,15 +53,19 @@ public class QueueObserver implements Observer {
 		}
 	}
 
-	private Listener getLisenter(List<String> ips) {
+	private void send(String groupName, List<String> ips, String msg) throws NoServerAddrException {
 		int random = RandomUtil.random(ips.size());
-		List<String> classNames = (List<String>) Cache.getCache().get(ips.get(random));
-		return new Listener(classNames.get(random),ips.get(random));
+		List<String> classNames = (List<String>) cache.get(groupName + "_" + ips.get(random));
+		if (null != classNames && classNames.size() > 0) {
+			sendMsg(classNames.get(random), ips.get(random), msg);
+		} else {
+			send(groupName,ips,msg);
+		}
 	}
 
-	private void sendMsg(Listener listener, String msg) throws NoServerAddrException {
+	private void sendMsg(String groupName, String ip, String msg) throws NoServerAddrException {
 		Request request = new Request();
-		request.setListenerName(listener.getName());
+		request.setListenerName(groupName);
 		request.setMsg(msg);
 		request.setType(Constant.REQUEST_TYPE_CALLBACK);
 		//CallBack.getCallBack().callback(host, port, request);
@@ -73,7 +73,7 @@ public class QueueObserver implements Observer {
 		try {
 			QueueSender queueSender = ringBuffer.get(next);
 			queueSender.setRequest(request);
-			queueSender.setServerAddr(listener.getAddr());
+			queueSender.setServerAddr(ip);
 		} finally {
 			ringBuffer.publish(next);
 		}

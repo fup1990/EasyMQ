@@ -36,11 +36,11 @@ public class Cache {
 		return cache;
 	}
 	
-	public synchronized void set(String key, Object value) {
+	public void set(String key, Object value) {
 		loadingCache.put(key, value);
 	}
 	
-	public synchronized Object get(String key) {
+	public Object get(String key) {
 		Object result = null;
 		try {
 			result = loadingCache.get(key);
