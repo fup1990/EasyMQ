@@ -4,7 +4,7 @@
 通过zookeeper进行消费者管理<br/>
 使用disruptor并发框架<br/>
 使用guava cache缓存<br/>
-使用kryo提高序列化性能<br/>
+使用kryo高性能的序列化框架<br/>
 
 # 模块介绍
 mqcommon是公共模块<br/>
