@@ -91,9 +91,11 @@ public class ZKRegister implements InitializingBean{
                         } catch (KeeperException e) {
                             e.printStackTrace();
                             logger.error(e.getMessage());
+                            break;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                             logger.error(e.getMessage());
+                            break;
                         }
                     }
                 } catch (IOException e) {
@@ -156,7 +158,7 @@ public class ZKRegister implements InitializingBean{
 
     private void hasRootPath() {
         try {
-            zooKeeper = new ZooKeeper("/", SESSIONTIMEOUT, null);
+            zooKeeper = new ZooKeeper(host, SESSIONTIMEOUT, null);
             Stat exists = zooKeeper.exists(PATH, false);
             if (null == exists) {
                 zooKeeper.create(PATH,null, ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
