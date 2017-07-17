@@ -39,10 +39,10 @@ public class Queue<E> extends LinkedBlockingQueue<E> implements Observable{
 			 if(!change) {
 				 return;
 			 }
-			 objs = list.toArray();
-			 for(int i = objs.length - 1; i >=0; i--) {
-				 ((Observer)objs[i]).update(this, groupName);
-			 }
+		}
+		objs = list.toArray();
+		for(int i = objs.length - 1; i >=0; i--) {
+			((Observer)objs[i]).update(this, groupName);
 		}
 	}
 

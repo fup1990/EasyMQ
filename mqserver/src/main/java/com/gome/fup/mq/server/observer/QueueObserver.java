@@ -9,7 +9,6 @@ import com.lmax.disruptor.dsl.Disruptor;
 import org.apache.log4j.Logger;
 
 import com.gome.fup.mq.common.http.Request;
-import com.gome.fup.mq.common.model.Listener;
 import com.gome.fup.mq.common.util.Cache;
 import com.gome.fup.mq.common.util.Constant;
 import com.gome.fup.mq.server.queue.Queue;
@@ -32,15 +31,17 @@ public class QueueObserver implements Observer {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object arg) {
-		Queue<String> queue = (Queue<String>)o;
-		String groupName = (String) arg;
-		sendMsgToListener(queue, groupName);
+		sendMsgToListener((Queue<String>)o, (String) arg);
 	}
 
 	private void sendMsgToListener(Queue<String> queue, String groupName) {
 		try {
-			List<String> ips = (List<String>) cache.get(groupName);
-			int size = queue.size();
+			List<String> ips;
+			int size;
+			synchronized (this) {
+				ips = (List<String>) cache.get(groupName);
+				size = queue.size();
+			}
 			for (int i = 0; i < size; i++) {
 				String msg = queue.take();
 				logger.debug("将消息发送给消费者。");
